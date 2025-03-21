@@ -25,26 +25,50 @@ def getDistanceBetweenPointsNew(latitude1, longitude1, latitude2, longitude2):
     return round(distance * 1.609344, 2)
 #-----
 
-
-
 # Initialize the geolocator
 geolocator = Nominatim(user_agent="travel_optimizer")
 
 # Function to get coordinates of a place
 def get_location(place):
     location = geolocator.geocode(place, exactly_one=False)
-    print(location)
+   
     if location:
-        return {
-            "name": location.address,
-            "latitude": location.latitude,
-            "longitude": location.longitude
-        }
+        return location
     else:
-        return "Location not found."
+        return []
 
-# Example usage
+city = 'Tokyo'
+shops = ['uniqlo', 'GU', 'bic camera']
+len_shops = len(shops)
+queries = [s +", " + city for s in shops]
+print(queries)
+
 place_name = "uniqlo, Tokyo"
-location_data = get_location(place_name)
+queries_results = []
 
-print("Search result:", location_data)
+for q in queries:
+    queries_results.append(get_location(q))
+l1, l2 = len(queries_results), len(queries_results[0])
+
+ans = 0
+detail = []
+for i in range(len_shops):
+    for j in range(len(queries_results[i])):
+        res = 1
+        de = [queries_results[i][j].address]
+        lon, lat = queries_results[i][j].longitude, queries_results[i][j].latitude
+        for k in range(i+1, len_shops):
+            for l in range(len(queries_results[k])):
+                lon_2, lat_2 = queries_results[k][l].longitude, queries_results[k][l].latitude
+                if getDistanceBetweenPointsNew(lat, lon, lat_2, lon_2) <= 2:
+                    res += 1
+                    de.append(queries_results[k][l].address)
+                    break
+        if res >= ans:
+            ans = res
+            detail.append(de)
+            
+print(ans, detail)
+#location_data = get_location(place_name)
+
+#print("Search result:", location_data)
